@@ -380,9 +380,9 @@
             x: 0,
             y: 0,
             radius: 8,
-            dx: 3,
+            dx: 0,
             dy: -3,
-            speed: 3  // Reduced from 4 to 3 for slower start
+            speed: 3  // Slower start speed that feels perfect after paddle bounce
         };
 
         // Bricks
@@ -662,8 +662,10 @@
         function resetBall() {
             ball.x = canvas.width / 2;
             ball.y = canvas.height - 150; // Spawn much lower, closer to paddle
-            ball.dx = ball.speed * (Math.random() > 0.5 ? 1 : -1);
-            ball.dy = -ball.speed;
+            // Use angle-based velocity like paddle collision for consistent speed
+            const angle = (Math.random() - 0.5) * Math.PI / 4; // Random angle up to 45 degrees
+            ball.dx = ball.speed * Math.sin(angle);
+            ball.dy = -ball.speed * Math.cos(angle); // Always goes up
         }
 
         // Update game
