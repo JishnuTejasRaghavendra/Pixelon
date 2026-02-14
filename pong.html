@@ -2,89 +2,115 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Pong Game - Arcadify</title>
     <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
     <style>
-        body {
+        * {
+            box-sizing: border-box;
             margin: 0;
             padding: 0;
+        }
+        body {
             display: flex;
             flex-direction: column;
-            justify-content: center;
-            align-items: center;
             min-height: 100vh;
             background: #111;
             font-family: 'Press Start 2P', cursive;
             color: white;
+            overflow-x: hidden;
+            position: relative;
         }
         #gameContainer {
-            text-align: center;
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: flex-start;
+            padding: 5px;
+            padding-bottom: 210px; /* Space for touch controls */
+            width: 100%;
+        }
+        h1 {
+            font-size: clamp(14px, 4vw, 24px);
+            margin: 10px 0 5px 0;
+        }
+        #scoreLabel {
+            font-size: clamp(8px, 2vw, 12px);
+            color: #aaa;
+            margin: 5px 0;
+        }
+        #score {
+            font-size: clamp(14px, 4vw, 24px);
+            margin: 5px 0 10px 0;
+            letter-spacing: clamp(5px, 2vw, 15px);
+        }
+        #canvasWrapper {
+            width: 100%;
+            max-width: 800px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            margin: 10px 0;
         }
         canvas {
             border: 3px solid #fff;
             background: #000;
             display: block;
-            margin: 20px auto;
             max-width: 100%;
             height: auto;
         }
-        #score {
-            font-size: 18px;
-            margin: 20px 0;
-        }
-        #scoreLabel {
-            font-size: 12px;
-            margin-bottom: 10px;
-            color: #aaa;
-        }
         #instructions {
-            font-size: 12px;
-            margin: 20px 0;
-            line-height: 2;
+            font-size: clamp(8px, 2vw, 12px);
+            line-height: 1.8;
+            margin: 10px 0;
+            padding: 0 10px;
+            text-align: center;
         }
-        #backButton {
-            margin-top: 20px;
-            padding: 15px 30px;
+        #gameOver {
+            display: none;
+            font-size: clamp(12px, 3vw, 18px);
+            margin: 15px 0;
+            padding: 0 10px;
+            text-align: center;
+        }
+        .button {
+            margin: 10px 5px;
+            padding: clamp(10px, 3vw, 15px) clamp(20px, 5vw, 30px);
             font-family: 'Press Start 2P', cursive;
-            font-size: 12px;
-            background: #f06;
-            color: white;
+            font-size: clamp(8px, 2vw, 12px);
             border: none;
             cursor: pointer;
             text-decoration: none;
             display: inline-block;
         }
+        #backButton {
+            background: #f06;
+            color: white;
+        }
         #backButton:hover {
             background: #d04;
         }
-        #gameOver {
-            display: none;
-            font-size: 18px;
-            margin: 20px 0;
-        }
         #restartButton {
             display: none;
-            margin-top: 20px;
-            padding: 15px 30px;
-            font-family: 'Press Start 2P', cursive;
-            font-size: 12px;
             background: #0f6;
             color: black;
-            border: none;
-            cursor: pointer;
         }
         #restartButton:hover {
             background: #0d4;
         }
+        
+        /* Touch Controls */
         #touchControls {
             display: none;
             position: fixed;
             bottom: 0;
             left: 0;
             right: 0;
-            height: 200px;
+            height: 180px;
             z-index: 1000;
+            background: rgba(0, 0, 0, 0.5);
+            border-top: 3px solid rgba(255, 0, 102, 0.5);
         }
         .touch-area {
             position: absolute;
@@ -95,32 +121,81 @@
         }
         .touch-area.left {
             left: 0;
-            background: rgba(255, 0, 102, 0.1);
+            background: rgba(255, 0, 102, 0.15);
         }
         .touch-button {
             flex: 1;
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 48px;
+            font-size: clamp(32px, 10vw, 60px);
             user-select: none;
             -webkit-user-select: none;
+            -webkit-tap-highlight-color: transparent;
+            color: white;
+            font-weight: bold;
+            border: 2px solid rgba(255, 255, 255, 0.1);
+            transition: background 0.1s;
         }
         .touch-button:active {
-            background: rgba(255, 255, 255, 0.2);
+            background: rgba(255, 255, 255, 0.4) !important;
         }
-        @media (max-width: 768px) {
+        .touch-button:first-child {
+            border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        /* Responsive Breakpoints */
+        @media (max-width: 768px) and (orientation: portrait) {
             #touchControls {
                 display: block;
             }
-            #instructions {
-                font-size: 10px;
+            #gameContainer {
+                padding-bottom: 190px;
+            }
+        }
+        
+        @media (max-width: 768px) and (orientation: landscape) {
+            #touchControls {
+                display: block;
+                height: 120px;
+            }
+            #gameContainer {
+                padding-bottom: 130px;
+                padding-top: 5px;
             }
             h1 {
-                font-size: 18px;
+                font-size: 14px;
+                margin: 5px 0;
             }
-            canvas {
-                max-width: 95vw;
+            #score, #scoreLabel {
+                font-size: 10px;
+            }
+            #instructions {
+                font-size: 7px;
+                line-height: 1.5;
+                margin: 5px 0;
+            }
+        }
+
+        @media (max-width: 480px) {
+            #touchControls {
+                height: 160px;
+            }
+            #gameContainer {
+                padding-bottom: 170px;
+            }
+        }
+
+        @media (max-height: 600px) {
+            #touchControls {
+                height: 120px;
+            }
+            #gameContainer {
+                padding-bottom: 130px;
+                padding-top: 5px;
+            }
+            h1 {
+                margin: 5px 0;
             }
         }
     </style>
@@ -130,15 +205,17 @@
         <h1>🏓 PONG</h1>
         <div id="scoreLabel">YOU vs COMPUTER</div>
         <div id="score">0 : 0</div>
-        <canvas id="pongCanvas" width="800" height="600"></canvas>
+        <div id="canvasWrapper">
+            <canvas id="pongCanvas"></canvas>
+        </div>
         <div id="instructions">
-            W / S - Move Paddle<br>
-            (Touch controls on mobile)<br>
+            Desktop: W / S keys<br>
+            Mobile: Touch controls below<br>
             First to 5 wins!
         </div>
         <div id="gameOver"></div>
-        <button id="restartButton">RESTART</button>
-        <a href="index.html" id="backButton">← BACK TO ARCADE</a>
+        <button id="restartButton" class="button">RESTART</button>
+        <a href="index.html" id="backButton" class="button">← BACK</a>
     </div>
 
     <div id="touchControls">
@@ -155,10 +232,28 @@
         const gameOverDisplay = document.getElementById('gameOver');
         const restartButton = document.getElementById('restartButton');
 
-        // Game objects
+        // Responsive canvas sizing
+        function resizeCanvas() {
+            const maxWidth = Math.min(800, window.innerWidth - 20);
+            const maxHeight = window.innerHeight - 400; // Leave space for UI and controls
+            
+            // Maintain 4:3 aspect ratio
+            if (maxWidth / maxHeight > 4/3) {
+                canvas.height = Math.min(600, maxHeight);
+                canvas.width = canvas.height * 4/3;
+            } else {
+                canvas.width = maxWidth;
+                canvas.height = canvas.width * 3/4;
+            }
+            
+            // Reset ball and paddle positions after resize
+            resetPositions();
+        }
+
+        // Game objects with relative sizing
         const ball = {
-            x: canvas.width / 2,
-            y: canvas.height / 2,
+            x: 0,
+            y: 0,
             radius: 10,
             speedX: 5,
             speedY: 5,
@@ -167,15 +262,15 @@
 
         const paddle1 = {
             x: 10,
-            y: canvas.height / 2 - 50,
+            y: 0,
             width: 10,
             height: 100,
             speed: 8
         };
 
         const paddle2 = {
-            x: canvas.width - 20,
-            y: canvas.height / 2 - 50,
+            x: 0,
+            y: 0,
             width: 10,
             height: 100,
             speed: 8
@@ -185,6 +280,20 @@
         let score2 = 0;
         let gameRunning = true;
         const winningScore = 5;
+
+        function resetPositions() {
+            ball.x = canvas.width / 2;
+            ball.y = canvas.height / 2;
+            paddle1.y = canvas.height / 2 - paddle1.height / 2;
+            paddle2.x = canvas.width - 20;
+            paddle2.y = canvas.height / 2 - paddle2.height / 2;
+            
+            // Scale speeds based on canvas size
+            const speedScale = canvas.width / 800;
+            ball.speed = 5 * speedScale;
+            paddle1.speed = 8 * speedScale;
+            paddle2.speed = 8 * speedScale;
+        }
 
         // Keyboard controls
         const keys = {};
@@ -203,15 +312,21 @@
 
         // Prevent scrolling on touch
         document.body.addEventListener('touchmove', (e) => {
-            e.preventDefault();
+            if (e.target.closest('#touchControls')) {
+                e.preventDefault();
+            }
         }, { passive: false });
 
-        // Left paddle touch controls (Player)
+        // Player paddle touch controls
         touchButtons.leftUp.addEventListener('touchstart', (e) => {
             e.preventDefault();
             keys['w'] = true;
         });
         touchButtons.leftUp.addEventListener('touchend', (e) => {
+            e.preventDefault();
+            keys['w'] = false;
+        });
+        touchButtons.leftUp.addEventListener('touchcancel', (e) => {
             e.preventDefault();
             keys['w'] = false;
         });
@@ -221,6 +336,10 @@
             keys['s'] = true;
         });
         touchButtons.leftDown.addEventListener('touchend', (e) => {
+            e.preventDefault();
+            keys['s'] = false;
+        });
+        touchButtons.leftDown.addEventListener('touchcancel', (e) => {
             e.preventDefault();
             keys['s'] = false;
         });
@@ -308,7 +427,7 @@
 
             // AI for Player 2 (Computer)
             const paddle2Center = paddle2.y + paddle2.height / 2;
-            const aiSpeed = 6; // Slightly slower than player for fair gameplay
+            const aiSpeed = paddle2.speed * 0.75; // 75% of player speed for fair gameplay
             
             // AI tries to follow the ball
             if (ball.x > canvas.width / 2) { // Only react when ball is on AI's side
@@ -329,6 +448,7 @@
         function resetBall() {
             ball.x = canvas.width / 2;
             ball.y = canvas.height / 2;
+            const speedScale = canvas.width / 800;
             ball.speedX = ball.speed * (Math.random() > 0.5 ? 1 : -1);
             ball.speedY = ball.speed * (Math.random() > 0.5 ? 1 : -1);
         }
@@ -375,7 +495,15 @@
             requestAnimationFrame(gameLoop);
         }
 
-        // Start game
+        // Handle window resize
+        window.addEventListener('resize', resizeCanvas);
+        window.addEventListener('orientationchange', () => {
+            setTimeout(resizeCanvas, 100);
+        });
+
+        // Initialize
+        resizeCanvas();
+        updateScore();
         gameLoop();
     </script>
 </body>
