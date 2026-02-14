@@ -3,98 +3,83 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="stylesheet" href="styles.css">
     <title>Arcadify</title>
+    <link rel="stylesheet" href="styles.css">
+    <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
+    <style>
+        body {
+            margin: 0;
+            font-family: 'Press Start 2P', cursive;
+            background-color: #0d0d0d;
+            color: #fff;
+        }
+        header {
+            position: sticky;
+            top: 0;
+            background: rgba(30, 30, 30, 0.9);
+            padding: 10px 20px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+            z-index: 1000;
+        }
+        nav ul {
+            list-style-type: none;
+            padding: 0;
+        }
+        nav ul li {
+            display: inline;
+            margin-right: 15px;
+        }
+        section {
+            padding: 20px;
+            border: 2px solid #f0f;
+            margin: 20px 0;
+            transition: transform 0.3s;
+        }
+        section:hover {
+            transform: scale(1.05);
+            background: rgba(255, 0, 255, 0.1);
+        }
+        .neon {
+            text-shadow: 0 0 5px #00f,
+                         0 0 10px #00f,
+                         0 0 15px #ff00ff,
+                         0 0 20px #ff00ff;
+        }
+    </style>
 </head>
 <body>
-    <header class="sticky-header">
-        <div class="logo">
-            <h1>Arcadify</h1>
-        </div>
-        <nav class="nav-menu">
+    <header>
+        <nav>
             <ul>
                 <li><a href="#home">Home</a></li>
                 <li><a href="#games">Games</a></li>
-                <li><a href="#about">About</a></li>
-                <li><a href="#contact">Contact</a></li>
+                <li><a href="#videos">Videos</a></li>
+                <li><a href="#gallery">Gallery</a></li>
+                <li><a href="#features">Features</a></li>
             </ul>
         </nav>
     </header>
-    <section id="hero">
-        <h2>Welcome to Arcadify!</h2>
-        <p>Discover and play your favorite games!</p>
+    <section id="home" class="neon">
+        <h1>Welcome to Arcadify</h1>
     </section>
     <section id="games">
-        <h2>Featured Games</h2>
-        <div class="game-showcase">
-            <div class="game-card">Game 1</div>
-            <div class="game-card">Game 2</div>
-            <div class="game-card">Game 3</div>
-        </div>
+        <h2>Games</h2>
+        <p>Explore our vast games collection!</p>
     </section>
-    <footer>
-        <p>&copy; 2026 Arcadify. All rights reserved.</p>
-    </footer>
-    <script src="script.js"></script>
+    <section id="videos">
+        <h2>Videos</h2>
+        <p>Watch our latest game trailers!</p>
+    </section>
+    <section id="gallery">
+        <h2>Gallery</h2>
+        <p>Check out the images from our games!</p>
+    </section>
+    <section id="features">
+        <h2>Features</h2>
+        <p>Discover the features of Arcadify!</p>
+    </section>
+    <script>
+        // Add any interactive elements or animations here 
+    </script>
 </body>
 </html>
-
-<style>
-body {
-    font-family: 'Arial', sans-serif;
-}
-
-.sticky-header {
-    position: sticky;
-    top: 0;
-    background: #333;
-    color: #fff;
-    padding: 10px 20px;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-}
-
-.nav-menu ul {
-    list-style: none;
-    display: flex;
-}
-
-.nav-menu li {
-    margin: 0 15px;
-}
-
-.nav-menu a {
-    color: white;
-    text-decoration: none;
-}
-
-#hero {
-    padding: 50px;
-    text-align: center;
-    background: #f0f0f0;
-}
-
-.game-showcase {
-    display: flex;
-    justify-content: space-around;
-    margin: 20px 0;
-}
-
-.game-card {
-    background: #ccc;
-    padding: 20px;
-    margin: 10px;
-}
-
-@media (max-width: 600px) {
-    .nav-menu ul {
-        flex-direction: column;
-    }
-}  
-</style>
-
-<script>
-// JavaScript for interactivity (if needed)
-console.log('Arcadify loaded!');
-</script>
