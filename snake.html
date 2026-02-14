@@ -303,7 +303,7 @@
         let score = 0;
         let gridSize = 20;
         let tileCount;
-        let gameSpeed = 150; // milliseconds per frame (slower = higher number)
+        let gameSpeed = 1000; // milliseconds per frame (1 second = 1 block per second)
 
         // Snake
         let snake = [];
@@ -488,9 +488,9 @@
                 score++;
                 scoreDisplay.textContent = score;
                 placeApple();
-                // Increase speed slightly (more gradual)
-                if (gameSpeed > 80) {
-                    gameSpeed = Math.max(80, gameSpeed - 1.5);
+                // Increase speed very gradually (reduce time between moves)
+                if (gameSpeed > 200) {
+                    gameSpeed = Math.max(200, gameSpeed - 15);
                 }
             } else {
                 // Remove tail if didn't eat apple
@@ -554,7 +554,7 @@
             nextVelocityX = 1;
             nextVelocityY = 0;
             score = 0;
-            gameSpeed = 150; // Start at slower speed
+            gameSpeed = 1000; // Start at 1 block per second
             scoreDisplay.textContent = score;
             
             // Initialize snake with 3 segments
