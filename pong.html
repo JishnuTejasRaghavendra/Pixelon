@@ -28,8 +28,11 @@
             align-items: center;
             justify-content: flex-start;
             padding: 5px;
-            padding-bottom: 210px; /* Space for touch controls */
+            padding-bottom: 20px; /* Default padding */
             width: 100%;
+        }
+        #gameContainer.with-touch-controls {
+            padding-bottom: 210px; /* Space for touch controls */
         }
         h1 {
             font-size: clamp(14px, 4vw, 24px);
@@ -112,6 +115,10 @@
             background: rgba(0, 0, 0, 0.5);
             border-top: 3px solid rgba(255, 0, 102, 0.5);
         }
+        /* Show on touch devices OR small screens */
+        #touchControls.show {
+            display: block;
+        }
         .touch-area {
             position: absolute;
             width: 100%;
@@ -146,20 +153,16 @@
 
         /* Responsive Breakpoints */
         @media (max-width: 768px) and (orientation: portrait) {
-            #touchControls {
-                display: block;
-            }
-            #gameContainer {
+            #gameContainer.with-touch-controls {
                 padding-bottom: 190px;
             }
         }
         
         @media (max-width: 768px) and (orientation: landscape) {
-            #touchControls {
-                display: block;
+            #touchControls.show {
                 height: 120px;
             }
-            #gameContainer {
+            #gameContainer.with-touch-controls {
                 padding-bottom: 130px;
                 padding-top: 5px;
             }
@@ -178,19 +181,19 @@
         }
 
         @media (max-width: 480px) {
-            #touchControls {
+            #touchControls.show {
                 height: 160px;
             }
-            #gameContainer {
+            #gameContainer.with-touch-controls {
                 padding-bottom: 170px;
             }
         }
 
         @media (max-height: 600px) {
-            #touchControls {
+            #touchControls.show {
                 height: 120px;
             }
-            #gameContainer {
+            #gameContainer.with-touch-controls {
                 padding-bottom: 130px;
                 padding-top: 5px;
             }
@@ -231,6 +234,28 @@
         const scoreDisplay = document.getElementById('score');
         const gameOverDisplay = document.getElementById('gameOver');
         const restartButton = document.getElementById('restartButton');
+        const touchControls = document.getElementById('touchControls');
+        const gameContainer = document.getElementById('gameContainer');
+
+        // Detect touch capability
+        function isTouchDevice() {
+            return (('ontouchstart' in window) ||
+                    (navigator.maxTouchPoints > 0) ||
+                    (navigator.msMaxTouchPoints > 0));
+        }
+
+        // Show touch controls on touch devices or small screens
+        function updateTouchControls() {
+            if (isTouchDevice() || window.innerWidth <= 768) {
+                touchControls.classList.add('show');
+                gameContainer.classList.add('with-touch-controls');
+            } else {
+                touchControls.classList.remove('show');
+                gameContainer.classList.remove('with-touch-controls');
+            }
+        }
+
+        updateTouchControls();
 
         // Responsive canvas sizing
         function resizeCanvas() {
@@ -496,9 +521,15 @@
         }
 
         // Handle window resize
-        window.addEventListener('resize', resizeCanvas);
+        window.addEventListener('resize', () => {
+            resizeCanvas();
+            updateTouchControls();
+        });
         window.addEventListener('orientationchange', () => {
-            setTimeout(resizeCanvas, 100);
+            setTimeout(() => {
+                resizeCanvas();
+                updateTouchControls();
+            }, 100);
         });
 
         // Initialize
