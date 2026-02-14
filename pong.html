@@ -374,6 +374,10 @@
             ball.speed = 5 * speedScale;
             paddle1.speed = 8 * speedScale;
             paddle2.speed = 8 * speedScale;
+            
+            // Initialize ball direction at scaled speed
+            ball.speedX = ball.speed * (Math.random() > 0.5 ? 1 : -1);
+            ball.speedY = ball.speed * (Math.random() > 0.5 ? 1 : -1);
         }
 
         // Keyboard controls
