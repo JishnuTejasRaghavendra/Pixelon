@@ -1,8 +1,8 @@
-# 🎮 Arcadify
+# 🎮 Pixelon
 
 **Your modern web arcade featuring multiple games and interactive apps**
 
-Welcome to Arcadify! A collection of browser-based games and applications built with pure HTML, CSS, and JavaScript. Play instantly in your browser - no downloads required!
+Welcome to Pixelon! A collection of browser-based games and applications built with pure HTML, CSS, and JavaScript. Play instantly in your browser - no downloads required!
 
 ---
 
@@ -20,13 +20,17 @@ Welcome to Arcadify! A collection of browser-based games and applications built 
 
 *Games will be listed here as they're added*
 
+- Pong
+- Snake
+- Breakout
+- Tetris
 - Coming soon...
 
 ---
 
 ## 🚀 Getting Started
 
-Visit [your-username.github.io/arcadify](https://your-username.github.io/arcadify) to start playing!
+Visit [jishnutejasraghavendra.github.io/Pixelon](https://jishnutejasraghavendra.github.io/pixelon) to start playing!
 
 ---
 
