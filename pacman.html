@@ -413,6 +413,8 @@
         let ghostSpeed = 0.08;
         let totalDots = 0;
         let dotsEaten = 0;
+        let respawning = false;
+        let respawnTimer = 0;
 
         // Countdown function
         function startCountdown(callback) {
@@ -536,7 +538,7 @@
             }
         }
 
-        // Check collision with walls
+        // Check collision with walls - TIGHTER collision
         function canMove(x, y, dir) {
             let newX = x;
             let newY = y;
@@ -546,8 +548,8 @@
             if (dir === 3) newY += pacman.speed; // Down
             if (dir === 4) newX -= pacman.speed; // Left
             
-            // Check corners of Pac-Man
-            const margin = 0.4;
+            // Check corners of Pac-Man with TIGHTER margin
+            const margin = 0.3; // Tighter than 0.4
             const corners = [
                 [newX + margin, newY + margin],
                 [newX + 1 - margin, newY + margin],
@@ -569,6 +571,17 @@
         function updatePacman() {
             // Try to change direction
             if (pacman.nextDirection !== 0 && canMove(pacman.x, pacman.y, pacman.nextDirection)) {
+                // Align to grid when changing direction for smoother turning
+                const centerX = Math.floor(pacman.x) + 0.5;
+                const centerY = Math.floor(pacman.y) + 0.5;
+                const distToCenter = Math.abs(pacman.x - centerX) + Math.abs(pacman.y - centerY);
+                
+                // If close to center of tile, snap to it when turning
+                if (distToCenter < pacman.speed) {
+                    pacman.x = centerX;
+                    pacman.y = centerY;
+                }
+                
                 pacman.direction = pacman.nextDirection;
             }
             
@@ -684,6 +697,10 @@
                         scoreDisplay.textContent = score;
                         ghost.x = ghost.startX;
                         ghost.y = ghost.startY;
+                        
+                        // Add 2 second respawn delay
+                        respawning = true;
+                        respawnTimer = 120; // 2 seconds at 60fps
                     } else {
                         // Lose life
                         lives--;
@@ -692,7 +709,9 @@
                         if (lives <= 0) {
                             endGame();
                         } else {
-                            resetPositions();
+                            // Add 2 second respawn delay before resetting
+                            respawning = true;
+                            respawnTimer = 120; // 2 seconds at 60fps
                         }
                     }
                 }
@@ -814,12 +833,26 @@
             ctx.fillStyle = '#000';
             ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-            updatePacman();
-            updateGhosts();
+            // Handle respawn delay
+            if (respawning) {
+                respawnTimer--;
+                if (respawnTimer <= 0) {
+                    respawning = false;
+                    resetPositions();
+                }
+                // Still draw everything but don't update positions
+                drawMaze();
+                drawPacman();
+                drawGhosts();
+            } else {
+                // Normal gameplay
+                updatePacman();
+                updateGhosts();
 
-            drawMaze();
-            drawPacman();
-            drawGhosts();
+                drawMaze();
+                drawPacman();
+                drawGhosts();
+            }
 
             requestAnimationFrame(gameLoop);
         }
@@ -841,6 +874,9 @@
             livesDisplay.textContent = lives;
             gameOverDisplay.style.display = 'none';
             restartButton.style.display = 'none';
+            
+            respawning = false;
+            respawnTimer = 0;
             
             maze = JSON.parse(JSON.stringify(originalMaze));
             dotsEaten = 0;
