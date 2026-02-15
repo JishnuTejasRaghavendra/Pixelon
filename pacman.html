@@ -490,7 +490,7 @@
             }
         });
 
-        // Touch controls
+        // Touch controls - FIXED with multiple event types
         const touchButtons = {
             up: document.getElementById('btnUp'),
             down: document.getElementById('btnDown'),
@@ -498,28 +498,49 @@
             right: document.getElementById('btnRight')
         };
 
+        // Prevent scrolling
         document.body.addEventListener('touchmove', (e) => {
             if (e.target.closest('#touchControls')) {
                 e.preventDefault();
             }
         }, { passive: false });
 
+        // Up button
         touchButtons.up.addEventListener('touchstart', (e) => {
             e.preventDefault();
             if (gameRunning) pacman.nextDir = 1;
         });
+        touchButtons.up.addEventListener('click', (e) => {
+            e.preventDefault();
+            if (gameRunning) pacman.nextDir = 1;
+        });
 
+        // Right button
         touchButtons.right.addEventListener('touchstart', (e) => {
             e.preventDefault();
             if (gameRunning) pacman.nextDir = 2;
         });
+        touchButtons.right.addEventListener('click', (e) => {
+            e.preventDefault();
+            if (gameRunning) pacman.nextDir = 2;
+        });
 
+        // Down button
         touchButtons.down.addEventListener('touchstart', (e) => {
             e.preventDefault();
             if (gameRunning) pacman.nextDir = 3;
         });
+        touchButtons.down.addEventListener('click', (e) => {
+            e.preventDefault();
+            if (gameRunning) pacman.nextDir = 3;
+        });
 
+        // Left button
         touchButtons.left.addEventListener('touchstart', (e) => {
+            e.preventDefault();
+            if (gameRunning) pacman.nextDir = 4;
+        });
+        touchButtons.left.addEventListener('click', (e) => {
             e.preventDefault();
             if (gameRunning) pacman.nextDir = 4;
         });
@@ -536,7 +557,7 @@
             }
         }
 
-        // Check if can move in direction
+        // Check if can move in direction (cage tiles are walkable)
         function canMove(x, y, dir) {
             let newX = x;
             let newY = y;
@@ -547,9 +568,9 @@
             if (dir === 4) newX--;
             
             if (newY < 0 || newY >= ROWS || newX < 0 || newX >= COLS) return false;
-            if (maze[newY][newX] === 1) return false;
+            if (maze[newY][newX] === 1) return false; // Wall blocks
             
-            return true;
+            return true; // Can move through empty, dots, pellets, and cage
         }
 
         // Update Pac-Man (smooth pixel-based movement)
@@ -632,7 +653,7 @@
             }
         }
 
-        // Update ghosts with cage timer that ALWAYS counts
+        // Update ghosts with cage timer that ALWAYS counts - FIX WALL COLLISION
         function updateGhosts() {
             ghosts.forEach(ghost => {
                 // Handle cage timer - ALWAYS count down, even when paused
@@ -682,14 +703,21 @@
                     
                     if (filtered.length > 0) {
                         ghost.dir = filtered[0];
+                    } else if (directions.length > 0) {
+                        ghost.dir = directions[0];
                     }
                 }
                 
-                // Move ghost smoothly
-                if (ghost.dir === 1) ghost.y -= SPEED;
-                if (ghost.dir === 2) ghost.x += SPEED;
-                if (ghost.dir === 3) ghost.y += SPEED;
-                if (ghost.dir === 4) ghost.x -= SPEED;
+                // Move ghost smoothly - CHECK if can move in current direction
+                const gridX = Math.floor(ghost.x);
+                const gridY = Math.floor(ghost.y);
+                
+                if (canMove(gridX, gridY, ghost.dir)) {
+                    if (ghost.dir === 1) ghost.y -= SPEED;
+                    if (ghost.dir === 2) ghost.x += SPEED;
+                    if (ghost.dir === 3) ghost.y += SPEED;
+                    if (ghost.dir === 4) ghost.x -= SPEED;
+                }
                 
                 // Wrap around
                 if (ghost.x < 0) ghost.x = COLS;
