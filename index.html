@@ -664,23 +664,26 @@
 
             const t = Date.now() / 1000;
 
-            // Find the exact screen positions of "T" in THE and "E" in ARCADE using Range API
             const word1 = document.querySelector('.word1'); // "THE"
             const word3 = document.querySelector('.word3'); // "ARCADE"
             if (!word1 || !word3) { requestAnimationFrame(animateCharacters); return; }
 
-            const tRect = getCharRect(word1, 0); // "T" is char index 0 of "THE"
-            const eRect = getCharRect(word3, 5); // "E" is char index 5 of "ARCADE"
+            const tRect = getCharRect(word1, 0); // "T"
+            const eRect = getCharRect(word3, 5); // "E"
             if (!tRect || !eRect) { requestAnimationFrame(animateCharacters); return; }
 
-            // Base positions: center of the letter, offset slightly above
+            // Scale block size to match letter height
+            const pacBlock = Math.max(2, Math.round(tRect.height / 11));
+            const invBlock = Math.max(2, Math.round(eRect.height / 8));
+
+            // Base positions centered on each letter
             const pacBaseX = tRect.left + tRect.width / 2 - 20;
             const pacBaseY = tRect.top - 20;
 
             const invBaseX = eRect.left + eRect.width / 2;
             const invBaseY = eRect.bottom + 20;
 
-            // Smooth sinusoidal float - different frequencies per character
+            // Smooth float
             const pacX = pacBaseX + Math.sin(t * 0.55) * 12 + Math.cos(t * 1.05) * 6;
             const pacY = pacBaseY + Math.cos(t * 0.45) * 10 + Math.sin(t * 0.85) * 5;
             const pacRot = Math.sin(t * 0.38) * 0.18;
@@ -689,16 +692,16 @@
             const invY = invBaseY + Math.sin(t * 0.55) * 10 + Math.cos(t * 0.95) * 5;
             const invRot = Math.cos(t * 0.32) * 0.15;
 
-            // Draw Pac-Man — yellow→orange gradient, golden glow
-            drawPixelChar(charCtx, PAC, pacX, pacY, B,
+            // Draw Pac-Man — no eye
+            drawPixelChar(charCtx, PAC, pacX, pacY, pacBlock,
                 '#FFE83A', '#FF8C00',
                 'rgba(255, 200, 0, 0.95)',
                 pacRot,
-                { x: 3, y: 2 }
+                null
             );
 
-            // Draw Space Invader — green→cyan gradient, cyan glow
-            drawPixelChar(charCtx, INV, invX, invY, B,
+            // Draw Space Invader
+            drawPixelChar(charCtx, INV, invX, invY, invBlock,
                 '#00FF99', '#00CCFF',
                 'rgba(0, 230, 180, 0.95)',
                 invRot,
