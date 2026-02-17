@@ -137,7 +137,7 @@
             width: 100%;
             height: 100%;
             pointer-events: none;
-            z-index: 5;
+            z-index: -1;
         }
         
         @keyframes shootDown {
@@ -535,6 +535,180 @@
         
         // Initialize stars on page load
         generateStars();
+
+        // ---- PIXEL ART FLOATING CHARACTERS ----
+        const charCanvas = document.createElement('canvas');
+        charCanvas.style.cssText = 'position:fixed;top:0;left:0;width:100%;height:100%;pointer-events:none;z-index:99;';
+        charCanvas.width = window.innerWidth;
+        charCanvas.height = window.innerHeight;
+        document.body.appendChild(charCanvas);
+        const charCtx = charCanvas.getContext('2d');
+
+        window.addEventListener('resize', () => {
+            charCanvas.width = window.innerWidth;
+            charCanvas.height = window.innerHeight;
+        });
+
+        const B = 7; // pixel block size
+
+        // Pac-Man pixel art - 11x11 SQUARE (proper circle, small mouth)
+        const PAC = [
+            [0,0,0,1,1,1,1,1,0,0,0],
+            [0,0,1,1,1,1,1,1,1,0,0],
+            [0,1,1,1,1,1,1,1,1,1,0],
+            [1,1,1,1,1,1,1,1,1,0,0],
+            [1,1,1,1,1,1,1,1,0,0,0],
+            [1,1,1,1,1,1,0,0,0,0,0],
+            [1,1,1,1,1,1,1,1,0,0,0],
+            [1,1,1,1,1,1,1,1,1,0,0],
+            [0,1,1,1,1,1,1,1,1,1,0],
+            [0,0,1,1,1,1,1,1,1,0,0],
+            [0,0,0,1,1,1,1,1,0,0,0],
+        ];
+
+        // Space Invader pixel art (11 cols x 8 rows)
+        const INV = [
+            [0,0,1,0,0,0,0,0,1,0,0],
+            [0,0,0,1,0,0,0,1,0,0,0],
+            [0,0,1,1,1,1,1,1,1,0,0],
+            [0,1,1,0,1,1,1,0,1,1,0],
+            [1,1,1,1,1,1,1,1,1,1,1],
+            [1,0,1,1,1,1,1,1,1,0,1],
+            [1,0,1,0,0,0,0,0,1,0,1],
+            [0,0,0,1,1,0,1,1,0,0,0],
+        ];
+
+        // Use Range API to get exact pixel position of a specific character in an element
+        function getCharRect(element, charIndex) {
+            const textNode = element.firstChild;
+            if (!textNode) return null;
+            const range = document.createRange();
+            range.setStart(textNode, charIndex);
+            range.setEnd(textNode, charIndex + 1);
+            return range.getBoundingClientRect();
+        }
+
+        function drawPixelChar(ctx, pixels, cx, cy, block, col1, col2, glowCol, rotation, eyePos) {
+            const rows = pixels.length;
+            const cols = pixels[0].length;
+            const offX = -(cols * block) / 2;
+            const offY = -(rows * block) / 2;
+
+            // Cast shadow below (flattened)
+            ctx.save();
+            ctx.translate(cx + 4, cy + rows * block * 0.5 + 4);
+            ctx.scale(1, 0.2);
+            ctx.rotate(rotation * 0.2);
+            ctx.globalAlpha = 0.35;
+            for (let r = 0; r < rows; r++) {
+                for (let c = 0; c < cols; c++) {
+                    if (!pixels[r][c]) continue;
+                    ctx.fillStyle = '#000';
+                    ctx.fillRect(offX + c * block, offY + r * block, block - 1, block - 1);
+                }
+            }
+            ctx.restore();
+
+            // Character body
+            ctx.save();
+            ctx.translate(cx, cy);
+            ctx.rotate(rotation);
+
+            for (let r = 0; r < rows; r++) {
+                for (let c = 0; c < cols; c++) {
+                    if (!pixels[r][c]) continue;
+                    const px = offX + c * block;
+                    const py = offY + r * block;
+
+                    // Per-block gradient
+                    const g = ctx.createLinearGradient(px, py, px + block, py + block);
+                    g.addColorStop(0, col1);
+                    g.addColorStop(1, col2);
+
+                    ctx.shadowColor = glowCol;
+                    ctx.shadowBlur = 18;
+                    ctx.fillStyle = g;
+                    ctx.fillRect(px, py, block - 1, block - 1);
+
+                    // Top-left shine highlight
+                    ctx.shadowBlur = 0;
+                    ctx.fillStyle = 'rgba(255,255,255,0.30)';
+                    ctx.fillRect(px, py, block - 1, 2);
+                    ctx.fillRect(px, py, 2, block - 1);
+
+                    // Bottom-right dark edge
+                    ctx.fillStyle = 'rgba(0,0,0,0.25)';
+                    ctx.fillRect(px + block - 2, py + block - 2, 1, 1);
+                }
+            }
+
+            // Eye for Pac-Man
+            if (eyePos) {
+                const ex = offX + eyePos.x * block + block / 2;
+                const ey = offY + eyePos.y * block + block / 2;
+                ctx.fillStyle = '#000';
+                ctx.beginPath();
+                ctx.arc(ex, ey, block * 0.45, 0, Math.PI * 2);
+                ctx.fill();
+                ctx.fillStyle = 'rgba(255,255,255,0.65)';
+                ctx.beginPath();
+                ctx.arc(ex - 1, ey - 1, block * 0.16, 0, Math.PI * 2);
+                ctx.fill();
+            }
+
+            ctx.restore();
+        }
+
+        function animateCharacters() {
+            charCtx.clearRect(0, 0, charCanvas.width, charCanvas.height);
+
+            const t = Date.now() / 1000;
+
+            // Find the exact screen positions of "T" in THE and "E" in ARCADE using Range API
+            const word1 = document.querySelector('.word1'); // "THE"
+            const word3 = document.querySelector('.word3'); // "ARCADE"
+            if (!word1 || !word3) { requestAnimationFrame(animateCharacters); return; }
+
+            const tRect = getCharRect(word1, 0); // "T" is char index 0 of "THE"
+            const eRect = getCharRect(word3, 5); // "E" is char index 5 of "ARCADE"
+            if (!tRect || !eRect) { requestAnimationFrame(animateCharacters); return; }
+
+            // Base positions: center of the letter, offset slightly above
+            const pacBaseX = tRect.left + tRect.width / 2 - 20;
+            const pacBaseY = tRect.top - 20;
+
+            const invBaseX = eRect.left + eRect.width / 2;
+            const invBaseY = eRect.bottom + 20;
+
+            // Smooth sinusoidal float - different frequencies per character
+            const pacX = pacBaseX + Math.sin(t * 0.55) * 12 + Math.cos(t * 1.05) * 6;
+            const pacY = pacBaseY + Math.cos(t * 0.45) * 10 + Math.sin(t * 0.85) * 5;
+            const pacRot = Math.sin(t * 0.38) * 0.18;
+
+            const invX = invBaseX + Math.cos(t * 0.65) * 12 + Math.sin(t * 0.48) * 6;
+            const invY = invBaseY + Math.sin(t * 0.55) * 10 + Math.cos(t * 0.95) * 5;
+            const invRot = Math.cos(t * 0.32) * 0.15;
+
+            // Draw Pac-Man — yellow→orange gradient, golden glow
+            drawPixelChar(charCtx, PAC, pacX, pacY, B,
+                '#FFE83A', '#FF8C00',
+                'rgba(255, 200, 0, 0.95)',
+                pacRot,
+                { x: 3, y: 2 }
+            );
+
+            // Draw Space Invader — green→cyan gradient, cyan glow
+            drawPixelChar(charCtx, INV, invX, invY, B,
+                '#00FF99', '#00CCFF',
+                'rgba(0, 230, 180, 0.95)',
+                invRot,
+                null
+            );
+
+            requestAnimationFrame(animateCharacters);
+        }
+
+        animateCharacters();
     </script>
 </body>
 </html>
